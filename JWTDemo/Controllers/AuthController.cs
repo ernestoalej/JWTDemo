@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,13 +29,21 @@ namespace JWTDemo.Controllers
             //Signing credentials
             var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
-            //Create the token
+            //Add Claims
+            var Claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Role, "Administrator"),
+                new Claim(ClaimTypes.Role, "Reader"),
+                new Claim("My_Custom_Claim", "My_Custom_Value")
+            };
 
+            //Create the token
             var token = new JwtSecurityToken(
-                    issuer: "fredcom.com",
-                    audience: "fredcom.com",
-                    expires: DateTime.UtcNow.AddMinutes(1),
-                    signingCredentials: signingCredentials
+                    issuer: "fredcom.com",    // who created and sign this token.
+                    audience: "fredcom.com",  // who or what the token is intended for.
+                    expires: DateTime.UtcNow.AddMinutes(15),
+                    signingCredentials: signingCredentials,
+                    claims: Claims
                 );
 
             //Return the token
