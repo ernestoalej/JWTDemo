@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JWTDemo
 {
     public class Startup
     {
+        //Security Key
+
+        string securityKey = "87bff4f2-578d-4785-95e4-12a7dfb37a27";
+
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -24,6 +32,25 @@ namespace JWTDemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+           // Add Jason Web Token  Authenticacion
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            //What to validate
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateIssuerSigningKey = true,
+                            // Setup validate data
+                            ValidIssuer = "fredcom.com",
+                            ValidAudience = "fredcom.com",
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey))
+                        };
+                    }
+                );
+
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -34,6 +61,8 @@ namespace JWTDemo
             {
                 app.UseDeveloperExceptionPage();
             }
+
+           app.UseAuthentication();
 
             app.UseMvc();
         }
